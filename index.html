@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo Wordle</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
+</head>
+<body>
+    <button id="theme-toggle">Modo Escuro</button>
+    <header>
+        <h1>Geo Wordle</h1>
+        <p>Adivinhe o país em 6 tentativas com base em sua localização (longitude e latitude).</p>
+    </header>
+
+    <main>
+
+        <div id="palpites-container">
+        </div>
+        <div id="container-principal">
+            <div id="jogo-container">
+
+
+                    <div id="entrada-container">
+                        <label for="palpite-pais">Seu Palpite:</label>
+                        <input type="text" id="palpite-pais" placeholder="Digite o nome do país">
+                        <button id="enviar-palpite">Enviar</button>
+                        <p id="mensagem-feedback"></p>
+                        <button id="alternar-distancia">Mostrar Distância Detalhada</button>
+                    </div>
+                    <div id="dica-container">
+                        <button id="botao-dica" style="font-size: 2em; border: none; background: none; cursor: pointer;" aria-label="Mostrar Dica">💡</button>
+                        <p id="mensagem-dica" style="margin-top: 10px; font-size: 0.9em; color: #777; text-align: center;">Clique na lâmpada para obter uma dica (simulação de anúncio).</p>
+                        <div id="anuncio-container" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 5px; background-color: #f9f9f9; text-align: center;">
+                            <p>Simulação de Anúncio (clique em "Obter Dica" após a simulação)</p>
+                            <button id="obter-dica">Obter Dica</button>
+                        </div>
+                        <p id="dica-texto" style="margin-top: 15px; font-weight: bold; text-align: center; display: none;"></p>
+                    </div>
+                </div>
+                <div id="mapa-referencia-container">
+                    <div id="mapa-referencia" style="width: 100%; height: 100%;">
+                        <button id="maximizar-mapa">Maximizar</button>
+                    </div>
+                </div>
+            </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 - Geo Wordle</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        window.mapaReferencia = null; // Inicializa no escopo global
+
+        function inicializarMapa() {
+            const mapaRefDiv = document.getElementById('mapa-referencia');
+            if (mapaRefDiv && typeof L !== 'undefined') {
+                window.mapaReferencia = L.map(mapaRefDiv, {
+                    minZoom: 3,
+                    maxZoom: 4,
+                    zoomControl: false // Oculta os controles de zoom padrão no modo maximizado
+                }).setView([0, 0], 3);
+L.tileLayer('https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(window.mapaReferencia);
+                console.log("Mapa de referência inicializado com OpenStreetMap (subdomínio a).");
+            } else if (mapaRefDiv) {
+                console.log("Objeto L não definido. Tentando novamente em 100ms...");
+                setTimeout(inicializarMapa, 100);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', inicializarMapa);
+
+        // Modo Escuro
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            themeToggle.textContent = isDarkMode ? 'Modo Claro' : 'Modo Escuro';
+            localStorage.setItem('dark-mode', isDarkMode); // Salva a preferência
+        });
+
+        // Verifica a preferência ao carregar a página
+        const savedTheme = localStorage.getItem('dark-mode');
+        if (savedTheme === 'true') {
+            body.classList.add('dark-mode');
+            themeToggle.textContent = 'Modo Claro';
+        }
+    </script>
+</body>
+</html>
