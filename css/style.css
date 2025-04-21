@@ -21,7 +21,7 @@ body.dark-mode {
 header {
     text-align: center;
     padding: 30px 20px;
-    background-color: #ddd;
+    background-image: linear-gradient(to right, rgb(74, 255, 234), rgb(51, 216, 73));
     margin-bottom: 30px;
     width: 100%;
     box-sizing: border-box;
@@ -33,16 +33,17 @@ header {
 .dark-mode header {
     background-color: #333;
     box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    color: black;
 }
 
 header h1 {
     margin-top: 0;
-    color: #007bff;
+    color: #004048;
     transition: color 0.3s ease;
 }
 
 .dark-mode header h1 {
-    color: #64b5f6;
+    color: #004048;
 }
 
 main {
@@ -151,7 +152,7 @@ input[type="text"] {
 button {
     padding: 14px 24px;
     font-size: 18px;
-    background-color: #007bff;
+    background-image: linear-gradient(to right, rgb(2, 202, 95), rgb(188, 5, 188));
     color: white;
     border: none;
     border-radius: 6px;
