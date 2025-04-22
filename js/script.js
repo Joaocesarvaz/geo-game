@@ -40,8 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function atualizarMapaReferencia(latitude, longitude) {
-        if (window.mapaReferencia) {
-            window.mapaReferencia.setView([latitude, longitude], 3);
+        if (window.mapaReferencia && typeof google !== 'undefined') {
+            window.mapaReferencia.setCenter(new google.maps.LatLng(latitude, longitude));
+            window.mapaReferencia.setZoom(3);
         }
     }
 
@@ -71,9 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const distanciaArredondada = distancia / 1000; // Converter para milhar
             if (distanciaArredondada >= 1) {
-                return distanciaArredondada.toFixed(1) + ' mil';
+                return distanciaArredondada.toFixed(1) + ' mil km';
             } else {
-                return distancia.toFixed(0); // Se menor que 1000 km, mostra em km
+                return distancia.toFixed(0) + ' km';
             }
         }
     }
@@ -91,13 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const direcaoLat = paisCorreto.latitude > latPalpite ? '↑' : paisCorreto.latitude < latPalpite ? '↓' : '';
         const latContainer = document.createElement('div');
         latContainer.classList.add('palpite-celula', 'coordenada-celula');
-        latContainer.innerHTML = `<strong>Latitude:</strong><br><small>Distância: ${formatarDistancia(Math.abs(distanciaTotalKm))} km ${direcaoLat}</small>`;
+        latContainer.innerHTML = `<strong>Latitude:</strong><br><small>Distância: ${formatarDistancia(Math.abs(distanciaTotalKm))} ${direcaoLat}</small>`;
         latContainer.style.backgroundColor = getColorPorDistancia(Math.abs(distanciaTotalKm), 2000);
 
         const direcaoLon = paisCorreto.longitude > lonPalpite ? '→' : paisCorreto.longitude < lonPalpite ? '←' : '';
         const lonContainer = document.createElement('div');
         lonContainer.classList.add('palpite-celula', 'coordenada-celula');
-        lonContainer.innerHTML = `<strong>Longitude:</strong><br><small>Distância: ${formatarDistancia(Math.abs(distanciaTotalKm))} km ${direcaoLon}</small>`;
+        lonContainer.innerHTML = `<strong>Longitude:</strong><br><small>Distância: ${formatarDistancia(Math.abs(distanciaTotalKm))} ${direcaoLon}</small>`;
         lonContainer.style.backgroundColor = getColorPorDistancia(Math.abs(distanciaTotalKm), 3000);
 
         palpiteLinha.appendChild(paisCelula);
@@ -125,8 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
             atualizarMapaReferencia(paisPalpitado.latitude, paisPalpitado.longitude);
             palpitesAnteriores.push(palpiteJogador);
             palpitePaisInput.value = "";
-            tentativasRestantes--;
             limparSugestoes(); // Limpa as sugestões após o palpite
+            tentativasRestantes--;
 
             if (palpiteJogador.toLowerCase() === paisCorreto.nome.toLowerCase()) {
                 mensagemFeedback.textContent = `Parabéns! Você acertou em ${6 - tentativasRestantes} tentativas! O país era ${paisCorreto.nome}.`;
@@ -158,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 palpitePaisInput.value = pais.nome;
                 limparSugestoes();
             });
-            sugestoesContainer.appendChild(li);
         });
     }
 
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             maximizarMapaBotao.textContent = mapaMaximizado ? 'Minimizar' : 'Maximizar';
 
             if (window.mapaReferencia) {
-                window.mapaReferencia.invalidateSize();
+                google.maps.event.trigger(window.mapaReferencia, 'resize');
             }
         });
     }
@@ -234,8 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarDica();
             anuncioContainer.style.display = 'none';
         } else if (!dicaSolicitada) {
-            mensagemFeedback.textContent = "Clique na lâmpada primeiro para simular o anúncio.";
-        } else if (dicaUsada) {
             mensagemFeedback.textContent = "Você já usou a dica.";
         }
     });
