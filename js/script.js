@@ -40,9 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function atualizarMapaReferencia(latitude, longitude) {
-        if (window.mapaReferencia && typeof google !== 'undefined') {
-            window.mapaReferencia.setCenter(new google.maps.LatLng(latitude, longitude));
-            window.mapaReferencia.setZoom(3);
+        if (window.mapaReferencia) {
+            window.mapaReferencia.setView([latitude, longitude], 3);
         }
     }
 
@@ -72,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const distanciaArredondada = distancia / 1000; // Converter para milhar
             if (distanciaArredondada >= 1) {
-                return distanciaArredondada.toFixed(1) + ' mil km';
+                return distanciaArredondada.toFixed(1) + ' mil';
             } else {
-                return distancia.toFixed(0) + ' km';
+                return distancia.toFixed(0); // Se menor que 1000 km, mostra em km
             }
         }
     }
@@ -87,19 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
         paisCelula.classList.add('palpite-celula', 'pais-celula');
         paisCelula.textContent = palpitePais;
 
-        const distanciaTotalKm = calcularDistancia(latPalpite, lonPalpite, paisCorreto.latitude, paisCorreto.longitude);
+        const distanciaLat = calcularDistancia(latPalpite, lonPalpite, paisCorreto.latitude, lonPalpite); // Mantém a longitude do palpite
+        const distanciaLon = calcularDistancia(latPalpite, lonPalpite, latPalpite, paisCorreto.longitude); // Mantém a latitude do palpite
 
         const direcaoLat = paisCorreto.latitude > latPalpite ? '↑' : paisCorreto.latitude < latPalpite ? '↓' : '';
         const latContainer = document.createElement('div');
         latContainer.classList.add('palpite-celula', 'coordenada-celula');
-        latContainer.innerHTML = `<strong>Latitude:</strong><br><small>Distância: ${formatarDistancia(Math.abs(distanciaTotalKm))} ${direcaoLat}</small>`;
-        latContainer.style.backgroundColor = getColorPorDistancia(Math.abs(distanciaTotalKm), 2000);
+        latContainer.innerHTML = `<strong>Latitude:</strong><br><small>Distância: ${formatarDistancia(distanciaLat)} km ${direcaoLat}</small>`;
+        latContainer.style.backgroundColor = getColorPorDistancia(distanciaLat, 2000); // Ajuste o valor máximo conforme necessário
 
         const direcaoLon = paisCorreto.longitude > lonPalpite ? '→' : paisCorreto.longitude < lonPalpite ? '←' : '';
         const lonContainer = document.createElement('div');
         lonContainer.classList.add('palpite-celula', 'coordenada-celula');
-        lonContainer.innerHTML = `<strong>Longitude:</strong><br><small>Distância: ${formatarDistancia(Math.abs(distanciaTotalKm))} ${direcaoLon}</small>`;
-        lonContainer.style.backgroundColor = getColorPorDistancia(Math.abs(distanciaTotalKm), 3000);
+        lonContainer.innerHTML = `<strong>Longitude:</strong><br><small>Distância: ${formatarDistancia(distanciaLon)} km ${direcaoLon}</small>`;
+        lonContainer.style.backgroundColor = getColorPorDistancia(distanciaLon, 3000); // Ajuste o valor máximo conforme necessário
 
         palpiteLinha.appendChild(paisCelula);
         palpiteLinha.appendChild(latContainer);
@@ -126,8 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
             atualizarMapaReferencia(paisPalpitado.latitude, paisPalpitado.longitude);
             palpitesAnteriores.push(palpiteJogador);
             palpitePaisInput.value = "";
-            limparSugestoes(); // Limpa as sugestões após o palpite
             tentativasRestantes--;
+            limparSugestoes(); // Limpa as sugestões após o palpitez
 
             if (palpiteJogador.toLowerCase() === paisCorreto.nome.toLowerCase()) {
                 mensagemFeedback.textContent = `Parabéns! Você acertou em ${6 - tentativasRestantes} tentativas! O país era ${paisCorreto.nome}.`;
@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 palpitePaisInput.value = pais.nome;
                 limparSugestoes();
             });
+            sugestoesContainer.appendChild(li);
         });
     }
 
@@ -209,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             maximizarMapaBotao.textContent = mapaMaximizado ? 'Minimizar' : 'Maximizar';
 
             if (window.mapaReferencia) {
-                google.maps.event.trigger(window.mapaReferencia, 'resize');
+                window.mapaReferencia.invalidateSize();
             }
         });
     }
@@ -234,6 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarDica();
             anuncioContainer.style.display = 'none';
         } else if (!dicaSolicitada) {
+            mensagemFeedback.textContent = "Clique na lâmpada primeiro para simular o anúncio.";
+        } else if (dicaUsada) {
             mensagemFeedback.textContent = "Você já usou a dica.";
         }
     });
@@ -248,3 +251,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     carregarPaises();
 });
+
+
